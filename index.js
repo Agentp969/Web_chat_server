@@ -39,7 +39,7 @@ app.use(
   })
 );
 
-// Route
+// Router
 app.use("/", authRoute);
 app.use("/channel", channelRoute);
 app.use("/user", userRoute);

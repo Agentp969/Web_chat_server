@@ -12,13 +12,13 @@ module.exports.register = async (req, res) => {
     // save user
     const salt = await bcryptjs.genSalt(10);
     const hash = await bcryptjs.hash(password, salt);
-    const newUser = new User({
+    let newUser = new User({
       name: name,
       email: email,
       password: hash,
     });
     await newUser.save();
-    delete newUser.password;
+    newUser.password = undefined;
     return res.status(201).json({ newUser });
   } catch (err) {
     console.log(err + " ");

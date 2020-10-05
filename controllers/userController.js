@@ -1,7 +1,7 @@
 const jwtDecode = require("jwt-decode");
 const User = require("../models/userModel");
 const Channel = require("../models/channelModel");
-const ObjectId = require('mongodb').ObjectID;
+const ObjectId = require("mongodb").ObjectID;
 
 module.exports.createChannel = async (req, res) => {
   try {
@@ -98,6 +98,7 @@ module.exports.fetchMyChannels = async (req, res) => {
             _id: true,
             name: true,
             created: true,
+            isOnline: true
           },
           members: true,
         },
@@ -115,6 +116,19 @@ module.exports.fetchMyChannels = async (req, res) => {
 
     let channels = await Channel.aggregate(query);
     return res.status(200).json(channels);
+  } catch (err) {
+    console.log(err + " ");
+    return res.status(400).json(err + " ");
+  }
+};
+
+module.exports.updateUserStatus = async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    const user = await User.findByIdAndUpdate(userId, {
+      isOnline: req.body.isOnline,
+    });
+    return res.status(200).json(user);
   } catch (err) {
     console.log(err + " ");
     return res.status(400).json(err + " ");

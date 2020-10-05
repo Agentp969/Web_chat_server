@@ -7,8 +7,13 @@ module.exports = (io) => {
   let userName = null;
   let connections = new OrderedMap();
   io.on("connect", (socket) => {
-    socket.on("getUser", (user) => {
+    socket.on("getUser", async (user) => {
       userId = user._id;
+      io.sockets.emit("user_online", userId);
+      await axios.post("http://localhost:8080/user/updateUserStatus", {
+        userId: userId,
+        isOnline: true,
+      });
       userName = user.name;
     });
     console.log(`${userName} has connected`);
@@ -61,8 +66,8 @@ module.exports = (io) => {
         });
         const members = res.data.members;
         _.each(members, (id) => {
-          const memberConnection = connections.filter((connect) => 
-            `${connect.userId}` === `${id}`
+          const memberConnection = connections.filter(
+            (connect) => `${connect.userId}` === `${id}`
           );
           //console.log(memberConnection)
           if (memberConnection.size) {
@@ -77,9 +82,26 @@ module.exports = (io) => {
       }
     });
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
+      const closeConnection = connections.get(socket.id);
+      const userId = _.get(closeConnection, "userId", null);
+      // remove this socket client from the cache collection.
       connections = connections.remove(socket.id);
       console.log(`${userName} disconnected`);
+      if (userId) {
+        // now find all socket clients matching with userId
+        const userConnections = connections.filter(
+          (connect) => _.get(connect, "userId") === userId
+        );
+        if (userConnections.size === 0) {
+          // this mean no more socket clients is online with this userId. now user is offline.
+          io.sockets.emit("user_offline", userId);
+          await axios.post("http://localhost:8080/user/updateUserStatus", {
+            userId: userId,
+            isOnline: false,
+          });
+        }
+      }
     });
   });
 };

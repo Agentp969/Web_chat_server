@@ -14,6 +14,9 @@ const userSchema = new Schema({
   created:{
       type: Date,
       default: new Date(),
+  },
+  isOnline:{
+    type: Boolean,
   }
 });
 

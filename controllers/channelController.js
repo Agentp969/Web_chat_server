@@ -93,6 +93,7 @@ module.exports.fetchChannelMessages = async (req, res) => {
             _id: true,
             name: true,
             created: true,
+            isOnline: true,
           },
         },
       },

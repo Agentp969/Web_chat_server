@@ -10,8 +10,4 @@ router
 
 router.route("/login").post(controller.login);
 
-router.get("/", (req, res) => {
-  return res.status(200).json("hello");
-});
-
 module.exports = router;
